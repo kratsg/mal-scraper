@@ -22,22 +22,54 @@ from myanimelist.session import Session
 s = Session(username=username, password=password)
 
 '''
-Let's hope we logged in just fine
-'''
-assert s.logged_in() == True
+Let's hope we logged in just fine.
 
+Create the anime directory if it does not exist
+'''
+if not os.path.exists('anime'):
+    os.makedirs('anime')
+
+'''
+Time to start the loop, let's make sure we catch the right exceptions
+'''
 from myanimelist.anime import InvalidAnimeError, MalformedAnimePageError
 i = 0
-
-anime_attributes = ['aired', 'duration', 'episodes', 'producers', 'rating', 'staff', 'voice_actors']
+anime_attributes = [
+    # the following come from myanimelist.anime
+    'aired',
+    'duration',
+    'episodes',
+    'producers',
+    'rating',
+    'staff',
+    'voice_actors',
+    # the following come from myanimelist.media
+    'alternative_titles',
+    'characters',
+    'favorites',
+    'genres',
+    'members',
+    'picture',
+    'popular_tags',
+    'popularity',
+    'rank',
+    'related',
+    'score',
+    'score_stats',
+    'status',
+    'status_stats',
+    'synopsis',
+    'title',
+    'type'
+]
 
 while True:
     try:
         anime = s.anime(i)
         # force a load
         anime.load()
-        with open('{0:d}.json'.format(i), 'w+') as f:
+        with open('anime/{0:d}.json'.format(i), 'w+') as f:
             json.dump(dict((attr, getattr(anime, attr)) for attr in anime_attributes), f, sort_keys=True, indent=4, separators=(',', ': '))
     except (InvalidAnimeError, MalformedAnimePageError) as e:
-        logging.exception()
+        logging.exception(e)
     i+=1
